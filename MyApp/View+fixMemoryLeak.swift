@@ -16,11 +16,13 @@ extension View {
   func fixMemoryLeak() -> some View {
     if #available(iOS 17.2, *) {
       return self
-    }
-
-    swizzle()
-    return background {
-      FixLeakView()
+    } else if #available(iOS 17.0, *) {
+      swizzle()
+      return background {
+        FixLeakView()
+      }
+    } else {
+      return self
     }
   }
 }
@@ -87,7 +89,7 @@ fileprivate func swizzle() {
       Task { @MainActor [unowned storage] in
         let retainCount: UInt = _getRetainCount(storage)
         let umanaged: Unmanaged<AnyObject> = .passUnretained(storage)
-        
+
         for _ in 0..<retainCount - 1 {
           umanaged.release()
         }
