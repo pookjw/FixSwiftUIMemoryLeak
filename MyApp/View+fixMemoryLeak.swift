@@ -121,6 +121,6 @@ extension UIViewController {
       responder = _responder.parent
     }
 
-    return responder
+    return nil
   }
 }
