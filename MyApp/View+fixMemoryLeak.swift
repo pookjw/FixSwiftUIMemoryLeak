@@ -45,10 +45,6 @@ fileprivate struct FixLeakView: UIViewControllerRepresentable {
     override func didMove(toParent parent: UIViewController?) {
       super.didMove(toParent: parent)
 
-      if #available(iOS 17.2, *) {
-        return
-      }
-
       guard
         let type: UIViewController.Type = NSClassFromString("_TtGC7SwiftUI29PresentationHostingControllerVS_7AnyView_") as? UIViewController.Type,
         let hostingController: UIViewController = parentViewController(for: type) else {
