@@ -24,44 +24,40 @@ struct ContentView: View {
         isPresenting = true
       }
     .fullScreenCover(isPresented: $isPresenting) {
-      SheetView()
-        .fixMemoryLeak()
-    }
-  }
-}
-
-struct SheetView: View {
-  @Environment(\.dismiss) var dismiss
-  @State private var isPresenting: Bool = false
-
-  var body: some View {
-    VStack {
-      Button("Present") {
-        isPresenting = true
-      }
-
-      Button("Dismiss") {
-        dismiss()
-      }
-    }
-    .sheet(isPresented: $isPresenting) {
       SheetView_2()
         .fixMemoryLeak()
     }
   }
 }
 
+//struct SheetView: View {
+//  @Environment(\.dismiss) var dismiss
+//  @State private var isPresenting: Bool = false
+//
+//  var body: some View {
+//    VStack {
+//      Button("Present") {
+//        isPresenting = true
+//      }
+//
+//      Button("Dismiss") {
+//        dismiss()
+//      }
+//    }
+//    .sheet(isPresented: $isPresenting) {
+//      SheetView_2()
+//        .fixMemoryLeak()
+//    }
+//  }
+//}
+
 struct SheetView_2: View {
   @Environment(\.dismiss) var dismiss
   private let viewModel: ViewModel = .init()
 
   var body: some View {
-    VStack {
-
-
-      Button("Dismiss") {
-        dismiss()
-      }
+    Button("Dismiss") {
+      dismiss()
     }
   }
 }
