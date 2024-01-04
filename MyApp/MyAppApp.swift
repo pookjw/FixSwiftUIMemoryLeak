@@ -44,7 +44,7 @@ struct SheetView: View {
         dismiss()
       }
     }
-    .fullScreenCover(isPresented: $isPresenting) {
+    .sheet(isPresented: $isPresenting) {
       SheetView_2()
         .fixMemoryLeak()
     }
