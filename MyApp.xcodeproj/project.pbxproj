@@ -18,7 +18,6 @@
 		4F3DA3CE2B469014003066D0 /* MyAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyAppApp.swift; sourceTree = "<group>"; };
 		4F3DA3D22B469015003066D0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4F3DA3D52B469015003066D0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		4F3DA3DC2B4696A7003066D0 /* MyApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MyApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		4F3DA3E02B46AB6B003066D0 /* View+fixMemoryLeak.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+fixMemoryLeak.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -56,7 +55,6 @@
 				4F3DA3E02B46AB6B003066D0 /* View+fixMemoryLeak.swift */,
 				4F3DA3D22B469015003066D0 /* Assets.xcassets */,
 				4F3DA3D42B469015003066D0 /* Preview Content */,
-				4F3DA3DC2B4696A7003066D0 /* MyApp-Bridging-Header.h */,
 			);
 			path = MyApp;
 			sourceTree = "<group>";
@@ -293,7 +291,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = co.pixo.MyApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "MyApp/MyApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -326,7 +323,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = co.pixo.MyApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "MyApp/MyApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
