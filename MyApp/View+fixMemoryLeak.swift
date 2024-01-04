@@ -55,58 +55,29 @@ fileprivate struct FixLeakView: UIViewControllerRepresentable {
         return
       }
 
-      for child in Mirror(reflecting: hostingController).children {
-        if child.label == "delegate" {
-          for child in Mirror(reflecting: child.value).children {
-            if child.label == "some" {
-              for child in Mirror(reflecting: child.value).children {
-                if child.label == "presentationState" {
-                  for child in Mirror(reflecting: child.value).children {
-                    if child.label == "base" {
-                      for child in Mirror(reflecting: child.value).children {
-                        if child.label == "requestedPresentation" {
-                          for child in Mirror(reflecting: child.value).children {
-                            if child.label == ".0" {
-                              for child in Mirror(reflecting: child.value).children {
-                                if child.label == "content" {
-                                  for child in Mirror(reflecting: child.value).children {
-                                    if child.label == "storage" {
-                                      let didFix: Bool = objc_getAssociatedObject(child.value, didFixKey_1) as? Bool ?? false
+      if 
+        let delegate = Mirror(reflecting: hostingController).children.first(where: { $0.label == "delegate" })?.value,
+        let some = Mirror(reflecting: delegate).children.first(where: { $0.label == "some" })?.value,
+        let presentationState = Mirror(reflecting: some).children.first(where: { $0.label == "presentationState" })?.value,
+        let base = Mirror(reflecting: presentationState).children.first(where: { $0.label == "base" })?.value,
+        let requestedPresentation = Mirror(reflecting: base).children.first(where: { $0.label == "requestedPresentation" })?.value,
+        let value = Mirror(reflecting: requestedPresentation).children.first(where: { $0.label == ".0" })?.value,
+        let content = Mirror(reflecting: value).children.first(where: { $0.label == "content" })?.value,
+        let storage = Mirror(reflecting: content).children.first(where: { $0.label == "storage" })?.value
+      {
+        let didFix: Bool = objc_getAssociatedObject(storage, didFixKey_1) as? Bool ?? false
 
-                                      guard !didFix else {
-                                        break
-                                      }
-
-                                      let unmanaged = Unmanaged.passUnretained(child.value as AnyObject)
-                                      unmanaged.release()
-                                      unmanaged.release()
-                                      unmanaged.release()
-
-                                      objc_setAssociatedObject(child.value, didFixKey_1, true, .OBJC_ASSOCIATION_COPY_NONATOMIC)
-                                      objc_setAssociatedObject(hostingController, storageKey, child.value, .OBJC_ASSOCIATION_ASSIGN)
-                                      break
-                                    }
-                                  }
-                                  break
-                                }
-                              }
-                              break
-                            }
-                          }
-                          break
-                        }
-                      }
-                      break
-                    }
-                  }
-                  break
-                }
-              }
-              break
-            }
-          }
-          break
+        guard !didFix else {
+          return
         }
+
+        let unmanaged = Unmanaged.passUnretained(storage as AnyObject)
+        unmanaged.release()
+        unmanaged.release()
+        unmanaged.release()
+
+        objc_setAssociatedObject(storage, didFixKey_1, true, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+        objc_setAssociatedObject(hostingController, storageKey, storage, .OBJC_ASSOCIATION_ASSIGN)
       }
     }
   }
