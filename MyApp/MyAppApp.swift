@@ -24,11 +24,12 @@ struct ContentView: View {
         isPresenting = true
       }
     .fullScreenCover(isPresented: $isPresenting) {
-      SheetView_2()
+      SheetView()
         .fixMemoryLeak()
     }
   }
 }
+
 struct SheetView: View {
   @Environment(\.dismiss) var dismiss
   @State private var isPresenting: Bool = false

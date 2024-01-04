@@ -5,11 +5,11 @@
 //  Created by Jinwoo Kim on 1/4/24.
 //
 
+import UIKit
 import SwiftUI
 
-let storageKey: UnsafeMutableRawPointer = .allocate(byteCount: 1, alignment: 1)
-fileprivate let didFixKey_1: UnsafeMutableRawPointer = .allocate(byteCount: 1, alignment: 1)
-fileprivate let didFixKey_2: UnsafeMutableRawPointer = .allocate(byteCount: 1, alignment: 1)
+fileprivate let storageKey: UnsafeMutableRawPointer = .allocate(byteCount: 1, alignment: 1)
+fileprivate let willDealloc: UnsafeMutableRawPointer = .allocate(byteCount: 1, alignment: 1)
 fileprivate var didSwizzle: Bool = false
 
 extension View {
@@ -35,7 +35,6 @@ fileprivate struct FixLeakView: UIViewControllerRepresentable {
   }
 
   @MainActor final class ViewController: UIViewController {
-
     override func viewDidLoad() {
       super.viewDidLoad()
       view.isUserInteractionEnabled = false
@@ -61,18 +60,6 @@ fileprivate struct FixLeakView: UIViewControllerRepresentable {
         let content = Mirror(reflecting: value).children.first(where: { $0.label == "content" })?.value,
         let storage = Mirror(reflecting: content).children.first(where: { $0.label == "storage" })?.value
       {
-        let didFix: Bool = objc_getAssociatedObject(storage, didFixKey_1) as? Bool ?? false
-
-        guard !didFix else {
-          return
-        }
-
-        let unmanaged = Unmanaged.passUnretained(storage as AnyObject)
-        unmanaged.release()
-        unmanaged.release()
-        unmanaged.release()
-
-        objc_setAssociatedObject(storage, didFixKey_1, true, .OBJC_ASSOCIATION_COPY_NONATOMIC)
         objc_setAssociatedObject(hostingController, storageKey, storage, .OBJC_ASSOCIATION_ASSIGN)
       }
     }
@@ -83,46 +70,44 @@ fileprivate func swizzle() {
   guard !didSwizzle else { return }
   defer { didSwizzle = true }
 
-  let method: Method = class_getInstanceMethod(UIViewController.self,
-                                               NSSelectorFromString("dismissViewControllerAnimated:completion:"))!
+  let method: Method = class_getInstanceMethod(
+    NSClassFromString("_TtGC7SwiftUI29PresentationHostingControllerVS_7AnyView_")!,
+    #selector(UIViewController.viewDidDisappear(_:))
+  )!
   let original_imp: IMP = method_getImplementation(method)
-  let original_func: @convention(c) (AnyObject, Selector, Bool, AnyObject) -> Void = unsafeBitCast(original_imp, to: (@convention(c) (AnyObject, Selector, Bool, AnyObject) -> Void).self)
+  let original_func = unsafeBitCast(original_imp, to: (@convention(c) (UIViewController, Selector, Bool) -> Void).self)
 
-  let new_func: @convention(block) (AnyObject, Bool, AnyObject) -> Void = { x0, x1, x2 in
+  let new_func: @convention(block) (UIViewController, Bool) -> Void = { x0, x1 in
     if
-      let hostingController: UIViewController = (x0 as? UIViewController)?.presentedViewController,
-      let storage: AnyObject = objc_getAssociatedObject(hostingController, storageKey) as? AnyObject,
-      objc_getAssociatedObject(storage, didFixKey_2) as? Bool ?? true
+      x0.isMovingFromParent || x0.isBeingDismissed,
+      let storage: AnyObject = objc_getAssociatedObject(x0, storageKey) as? AnyObject,
+      !(storage is NSNull),
+      objc_getAssociatedObject(storage, willDealloc) as? Bool ?? true
     {
-      let umanaged: Unmanaged<AnyObject> = .passUnretained(storage)
-      _ = umanaged.retain()
+      Task { @MainActor [unowned storage] in
+        do {
+          try await Task.sleep(for: .seconds(0.1))
 
-      var hasOverFullScreen: Bool = false
-      var vc: UIViewController? = hostingController
-      while let _vc = vc {
-        hasOverFullScreen = _vc.modalPresentationStyle == .overFullScreen
+          let retainCount: UInt = _getRetainCount(storage)
+          let umanaged: Unmanaged<AnyObject> = .passUnretained(storage)
 
-        if hasOverFullScreen {
-          break
+          for _ in 0..<retainCount - 1 {
+            umanaged.release()
+          }
+        } catch {
+
         }
-
-        vc = _vc.presentingViewController
       }
 
-      if hasOverFullScreen {
-        _ = umanaged.retain()
-      }
-
-      objc_setAssociatedObject(storage, didFixKey_2, true, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+      objc_setAssociatedObject(storage, willDealloc, true, .OBJC_ASSOCIATION_COPY_NONATOMIC)
     }
 
-    original_func(x0, NSSelectorFromString("dismissViewControllerAnimated:completion:"), x1, x2)
+    original_func(x0, #selector(UIViewController.viewDidDisappear(_:)), x1)
   }
 
   let new_imp: IMP = imp_implementationWithBlock(new_func)
   method_setImplementation(method, new_imp)
 }
-
 
 extension UIViewController {
   fileprivate func parentViewController(for type: UIViewController.Type) -> UIViewController? {
