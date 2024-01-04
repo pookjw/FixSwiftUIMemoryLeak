@@ -87,6 +87,10 @@ fileprivate func swizzle() {
       objc_getAssociatedObject(storage, willDealloc) as? Bool ?? true
     {
       Task { @MainActor [unowned storage] in
+//        guard try? await Task.sleep(for: .seconds(0.3)) else {
+//          return
+//        }
+
         let retainCount: UInt = _getRetainCount(storage)
         let umanaged: Unmanaged<AnyObject> = .passUnretained(storage)
 
